@@ -50,14 +50,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
         Debug.Log("We're connected and in a room now");
 
         roomCam.SetActive(false);
-        GameObject _player = PhotonNetwork.Instantiate(player.name, spawnPoint.position, Quaternion.identity);
-        _player.GetComponent<PlayerSetup>().IsLocalPlayer();
+
+        SpawnPlayer();
     }
 
-    public void RespawnPlayer()
+    public void SpawnPlayer()
     {
         GameObject _player = PhotonNetwork.Instantiate(player.name, spawnPoint.position, Quaternion.identity);
         _player.GetComponent<PlayerSetup>().IsLocalPlayer();
+        _player.GetComponent<Health>().isLocalPlayer = true;
     }
 
 }
