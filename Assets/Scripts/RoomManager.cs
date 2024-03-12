@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+
 public class RoomManager : MonoBehaviourPunCallbacks
 {
     public static RoomManager instance;
@@ -20,6 +22,13 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     private string nickname = "unnamed";
 
+    public string roomNametoJoin = "test";
+
+    [HideInInspector]
+    public int kills = 0;
+    [HideInInspector]
+    public int death = 0;
+
     private void Awake()
     {
         instance = this;
@@ -33,29 +42,11 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public void JoinRoomButtonPressed()
     {
         Debug.Log("Connecting...");
-        PhotonNetwork.ConnectUsingSettings();
+
+        PhotonNetwork.JoinOrCreateRoom(roomNametoJoin, null, null);
 
         nameUI.SetActive(false);
         connectingUI.SetActive(true);
-    }
-
-
-    public override void OnConnectedToMaster()
-    {
-        base.OnConnectedToMaster();
-
-        Debug.Log("Connected to Server");
-
-        PhotonNetwork.JoinLobby();
-    }
-
-    public override void OnJoinedLobby()
-    {
-        base.OnJoinedLobby();
-
-        Debug.Log("We're in the lobby");
-
-        PhotonNetwork.JoinOrCreateRoom("test", null, null);
     }
 
     public override void OnJoinedRoom()
@@ -67,6 +58,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
         roomCam.SetActive(false);
 
         SpawnPlayer();
+        Debug.Log("SpawnPlayer");
     }
 
     public void SpawnPlayer()
@@ -77,6 +69,23 @@ public class RoomManager : MonoBehaviourPunCallbacks
         _player.GetComponent<Health>().isLocalPlayer = true;
 
         _player.GetComponent<PhotonView>().RPC("SetNickname",RpcTarget.AllBuffered, nickname);
+        PhotonNetwork.LocalPlayer.NickName = nickname;
     }
 
+    public void SetHashes()
+    {
+        try
+        {
+            Hashtable hash = PhotonNetwork.LocalPlayer.CustomProperties;
+
+            hash["kills"] = kills;
+            hash["deaths"] = death;
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+        }
+        catch
+        {
+
+        }
+    }
 }
